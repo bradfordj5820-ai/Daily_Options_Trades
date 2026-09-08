@@ -1,0 +1,24 @@
+# --- SECTION 1: ACTIVE TRADES STAY/EXIT DECISIONS ---
+Rank Placed,Ticker,Decision,Urgency,Strategy,Entry Stock Price,Current Stock Price,Stock Change %,Entry Net Debit,Est Option Value,Est PnL %,Est PnL $,Contracts,Days Held,Remaining DTE,Suggested Action,Detailed Analysis
+1,"SPY","STAY","NORMAL","Straight Call","$765.72","$765.72","+0%","$29.45","$29.34","-0.4%","$-11.00",1,1,52,"Maintain position. Stock target is $811.66 (+6.0%); stop-loss is $742.75 (-3.0%).","SPY is trading at $765.72 (+0% from entry). Stock remains comfortably above stop-loss ($742.75) with 52 DTE remaining. Estimated position P&L is -0.4% ($-11)."
+3,"XLV","STAY","NORMAL","Bull Call Spread","$174.62","$174.62","+0%","$6.95","$6.92","-0.4%","$-3.00",1,1,52,"Maintain position. Stock target is $185.10 (+6.0%); stop-loss is $169.38 (-3.0%).","XLV is trading at $174.62 (+0% from entry). Stock remains comfortably above stop-loss ($169.38) with 52 DTE remaining. Estimated position P&L is -0.4% ($-3)."
+1,"SPY","STAY","NORMAL","Straight Call","$765.72","$765.72","+0%","$29.45","$29.34","-0.4%","$-11.00",1,1,52,"Maintain position. Stock target is $811.66 (+6.0%); stop-loss is $742.75 (-3.0%).","SPY is trading at $765.72 (+0% from entry). Stock remains comfortably above stop-loss ($742.75) with 52 DTE remaining. Estimated position P&L is -0.4% ($-11)."
+1,"NVDA","EXIT","HIGH","Straight Call","$128.50","$214.72","+67.1%","$6.80","$68.85","+912.5%","$12410.00",2,1,44,"Execute 'Sell to Close' on 2 contract(s) to secure +$12410 total profit.","NVDA has reached the target threshold (+$86.22 / +67.1%). Option gain is estimated at +912.5% (+$12410). Quantitative desk rules dictate locking in profits into strength."
+
+# --- SECTION 2: SCREENED PRE-MARKET OPTION CANDIDATES ---
+Rank,Ticker,Total Score,Stock Price,Strategy,Target DTE,Long Strike (0.70Δ),Short Strike (0.30Δ),Est. Net Debit,Max Profit Potential,RSI,Spread %,Open Interest
+1,"SPY",100,"$765.72","Straight Call",53,"$750.00","N/A","$29.45","Unlimited",54.2,"0.85%",4200
+2,"IWM",100,"$299.96","Straight Call",53,"$295.00","N/A","$10.75","Unlimited",52.6,"0.85%",4200
+3,"XLV",100,"$174.62","Bull Call Spread",53,"$169.00","$184.00","$6.95","$8.05/sh ($805/ctr)",68.3,"0.85%",4200
+4,"XLY",100,"$118.02","Straight Call",53,"$114.00","N/A","$6.88","Unlimited",53.7,"0.85%",4200
+5,"NVDA",100,"$214.72","Straight Call",53,"$205.00","N/A","$18.00","Unlimited",51,"0.85%",4200
+6,"MSFT",100,"$483.24","Straight Call",53,"$450.00","N/A","$56.78","Unlimited",62.4,"0.85%",4200
+7,"XLC",90,"$111.40","Straight Call",53,"$108.00","N/A","$6.14","Unlimited",52.5,"0.85%",4200
+8,"QQQ",85,"$713.44","Straight Call",53,"$690.00","N/A","$39.88","Unlimited",50.1,"0.85%",4200
+9,"XLK",85,"$183.31","Straight Call",53,"$175.00","N/A","$13.74","Unlimited",49.5,"0.85%",4200
+10,"XLF",85,"$57.48","Straight Call",53,"$56.00","N/A","$2.42","Unlimited",54.9,"0.85%",4200
+11,"XLE",85,"$63.64","Bull Call Spread",53,"$62.00","$67.00","$2.25","$2.75/sh ($275/ctr)",71.7,"0.85%",4200
+12,"AMZN",70,"$258.63","Straight Call",53,"$240.00","N/A","$31.69","Unlimited",49.7,"0.85%",4200
+13,"GOOGL",55,"$344.82","Straight Call",53,"$320.00","N/A","$38.22","Unlimited",47.2,"0.85%",4200
+14,"XLI",40,"$180.25","Straight Call",53,"$176.00","N/A","$7.56","Unlimited",43,"0.85%",4200
+15,"AAPL",25,"$309.35","Straight Call",52,"$295.00","N/A","$22.00","Unlimited",47.3,"1.20%",2199

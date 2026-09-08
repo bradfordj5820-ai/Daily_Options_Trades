@@ -1,0 +1,9 @@
+{
+  "name": "Daily Options Trades",
+  "description": "Autonomous Pre-Market Options Pipeline, Quantitative Screener, Trade Ingestion Agent & Daily Stay/Exit Decision Directives",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
+
