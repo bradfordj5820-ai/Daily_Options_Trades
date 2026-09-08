@@ -42,3 +42,23 @@ jobs:
         run: |
           # Executes your main server file using bun
           bun run server.ts
+
+      - name: Send Report via Email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '📊 Daily Options Pipeline Report'
+          to: ${{ secrets.RECIPIENT_EMAIL }}
+          from: ${{ secrets.SENDER_EMAIL }}
+          body: |
+            Your autonomous daily options pipeline has completed successfully.
+            
+            The HTML report and raw JSON dataset are attached to this email. Open the HTML file in any browser to review today's top candidates.
+          attachments: |
+            daily_report.html
+            .data/daily_dataset.json
+          
