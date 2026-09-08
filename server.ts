@@ -782,10 +782,22 @@ async function startServer() {
       res.status(500).json({ success: false, error: err.message || 'Evaluation failed' });
     }
   });
- // Start the server
-  app.listen(PORT, () => {
+// Start the server
+  const server = app.listen(PORT, () => {
     console.log(`[SERVER] Express server listening on port ${PORT}`);
   });
+
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('[SERVER] SIGTERM received, shutting down gracefully...');
+    clearInterval(schedulerInterval);
+    server.close(() => {
+      console.log('[SERVER] Server closed');
+      process.exit(0);
+    });
+  });
+
+  return; // Exit the async function after server starts
 }
 
 startServer().catch(err => {
