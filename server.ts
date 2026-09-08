@@ -281,7 +281,7 @@ async function startServer() {
   // SCHEDULER: Check every 60 seconds for 8:00 AM CDT/CST (Mon-Fri)
   // ========================================================
   let lastCronRunDate: string = '';
-  setInterval(async () => {
+  const schedulerInterval = setInterval(async () => {
     try {
       const now = new Date();
       // Format current day of week and time in America/Chicago
@@ -533,7 +533,7 @@ async function startServer() {
       const optionsStopLoss = parseFloat((totalNetDebit * 0.40).toFixed(2));
 
       const executionDesc = isSpread && shortStrike
-        ? `BOUGHT 10x ${candidate.Ticker} $${longStrike} Calls (${candidate.LongDelta}Δ) / SOLD 10x $${shortStrike} Calls (${candidate.ShortDelta || 0.30}Δ) @ $${actualNetDebit.toFixed(2)} net debit ($${totalNetDebit.toFixed(2)} total outlay)`
+        ? `BOUGHT 10x ${candidate.Ticker} $${longStrike} Calls (${candidate.LongDelta}Δ) / SOLD 10x $${shortStrike} Calls (${candidate.ShortDelta || 0.30}Δ) @ $${actualNetDebit.toFixed(2)} net debit`
         : `BOUGHT 10x ${candidate.Ticker} $${longStrike} Calls (${candidate.LongDelta}Δ) @ $${actualNetDebit.toFixed(2)} net debit ($${totalNetDebit.toFixed(2)} total outlay)`;
 
       const newTrade: PlacedTrade = {
@@ -677,7 +677,7 @@ async function startServer() {
           determination = 'EXIT';
           subVerdict = 'EXIT - STOP LOSS TRIGGERED';
           urgency = 'HIGH';
-          recommendedAction = `Execute Sell to Close across all 10 contracts to cap loss at -$${Math.abs(unrealizedPnLDollar).toFixed(2)} (-${Math.abs(unrealizedPnLPct).toFixed(1)}%). Underlying broke risk threshold ($${trade.stockStopLossPrice.toFixed(2)}).`;
+          recommendedAction = `Execute Sell to Close across all 10 contracts to cap loss at -$${Math.abs(unrealizedPnLDollar).toFixed(2)} (-${Math.abs(unrealizedPnLPct).toFixed(1)}%). Underlying broke stop loss.`;
         } else if (remainingDTE <= 14 && unrealizedPnLPct < 20.0) {
           determination = 'EXIT';
           subVerdict = 'EXIT - THETA TIME DECAY';
@@ -687,7 +687,7 @@ async function startServer() {
           determination = 'STAY';
           subVerdict = 'STAY - ON TRACK';
           urgency = 'LOW';
-          recommendedAction = `Maintain position (10 contracts). Stock up +${stockChangePct.toFixed(2)}%. Profit running at +$${unrealizedPnLDollar.toFixed(2)}. Stop-loss pegged at $${trade.stockStopLossPrice.toFixed(2)}.`;
+          recommendedAction = `Maintain position (10 contracts). Stock up +${stockChangePct.toFixed(2)}%. Profit running at +$${unrealizedPnLDollar.toFixed(2)}. Stop-loss pegged at $${trade.stockStopLossPrice}.`;
         } else {
           determination = 'STAY';
           subVerdict = 'STAY - PULLBACK HOLD';
@@ -782,7 +782,8 @@ async function startServer() {
       res.status(500).json({ success: false, error: err.message || 'Evaluation failed' });
     }
   });
-// Start the server
+
+  // Start the server
   const server = app.listen(PORT, () => {
     console.log(`[SERVER] Express server listening on port ${PORT}`);
   });
@@ -797,7 +798,18 @@ async function startServer() {
     });
   });
 
-  return; // Exit the async function after server starts
+  // Prevent server from running indefinitely during CI/CD execution
+  // Exit after initialization is complete (useful for GitHub Actions workflows)
+  if (process.env.CI === 'true') {
+    setTimeout(() => {
+      console.log('[SERVER] CI environment detected. Initiating graceful shutdown...');
+      clearInterval(schedulerInterval);
+      server.close(() => {
+        console.log('[SERVER] Server closed');
+        process.exit(0);
+      });
+    }, 30000); // 30 second timeout for CI environments
+  }
 }
 
 startServer().catch(err => {
