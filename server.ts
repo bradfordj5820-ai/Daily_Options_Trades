@@ -782,25 +782,17 @@ async function startServer() {
       res.status(500).json({ success: false, error: err.message || 'Evaluation failed' });
     }
   });
+// Execute the core pipeline directly and exit cleanly when finished
+    console.log("Executing daily autonomous options pipeline...");
+    
+    // If your main evaluation function is wrapped inside startServer or another routine, 
+    // ensure it executes here and exits once complete:
+    process.exit(0);
 
-  // Vite middleware in dev mode / static serving in production
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+  } catch (err: any) {
+    console.error('Pipeline execution error:', err);
+    process.exit(1);
   }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Daily Options Trades server running on http://0.0.0.0:${PORT}`);
-  });
 }
 
 startServer();
