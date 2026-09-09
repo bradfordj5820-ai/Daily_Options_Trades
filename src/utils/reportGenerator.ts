@@ -1,35 +1,33 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-export interface OptionRow {
-    ticker: string;
-    strategy: string;
-    strike: string;
-    expiration: string;
-    score: number | string;
-    [key: string]: any; // Allows additional fields from your JSON
-}
-
 export function generateHtmlReport(jsonFilePath: string, outputHtmlPath: string): void {
     if (!fs.existsSync(jsonFilePath)) {
-        throw new Error(`JSON report not found at: ${jsonFilePath}`);
+        console.warn(`[REPORT] Dataset JSON not found at: ${jsonFilePath}. Creating empty fallback report.`);
     }
 
-    const rawData = fs.readFileSync(jsonFilePath, 'utf8');
-    const rows: OptionRow[] = JSON.parse(rawData);
+    let candidates: any[] = [];
+    try {
+        const rawData = fs.readFileSync(jsonFilePath, 'utf8');
+        const parsed = JSON.parse(rawData);
+        // Supports both raw candidate arrays and the structured daily dataset object
+        candidates = Array.isArray(parsed) ? parsed : (parsed.candidates || []);
+    } catch (e) {
+        console.error('Error parsing dataset JSON for HTML report:', e);
+    }
 
     const currentDate = new Date().toLocaleDateString('en-US', {
         timeZone: 'America/Chicago',
         dateStyle: 'full'
     });
 
-    const tableRows = rows.map(row => `
+    const tableRows = candidates.map(row => `
         <tr>
-            <td><strong>${row.ticker || 'N/A'}</strong></td>
-            <td><span class="badge">${row.strategy || 'Options Play'}</span></td>
-            <td>${row.strike || 'N/A'}</td>
-            <td>${row.expiration || 'N/A'}</td>
-            <td><strong>${typeof row.score === 'number' ? row.score.toFixed(1) : (row.score || 'N/A')}</strong></td>
+            <td><strong>${row.Ticker || row.ticker || 'N/A'}</strong></td>
+            <td><span class="badge">${row.Strategy || row.strategy || 'Options Play'}</span></td>
+            <td>$${row.LongStrike || row.longStrike || 'N/A'}</td>
+            <td>${row.TargetExpiration || row.targetExpiration || 'N/A'}</td>
+            <td><strong>${typeof row.TotalScore === 'number' ? row.TotalScore.toFixed(1) : (row.TotalScore || 'N/A')}</strong></td>
         </tr>
     `).join('');
 
@@ -58,9 +56,9 @@ export function generateHtmlReport(jsonFilePath: string, outputHtmlPath: string)
                 <tr>
                     <th>Ticker</th>
                     <th>Strategy</th>
-                    <th>Strike</th>
+                    <th>Long Strike</th>
                     <th>Expiration</th>
-                    <th>Score</th>
+                    <th>Total Score</th>
                 </tr>
             </thead>
             <tbody>
@@ -71,7 +69,6 @@ export function generateHtmlReport(jsonFilePath: string, outputHtmlPath: string)
 </body>
 </html>`;
 
-    // Ensure output directory exists
     const dir = path.dirname(outputHtmlPath);
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
