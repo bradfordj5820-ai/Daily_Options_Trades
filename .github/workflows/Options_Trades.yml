@@ -54,11 +54,8 @@ jobs:
           subject: '📊 Daily Options Pipeline Report'
           to: ${{ secrets.RECIPIENT_EMAIL }}
           from: ${{ secrets.SENDER_EMAIL }}
-          body: |
-            Your autonomous daily options pipeline has completed successfully.
+          body: "Please find attached today's automated options screening report."
+          # Point the attachment directly to your generated HTML file
+          attachments: ./output/Daily_Options_Report.html
             
-            The HTML report and raw JSON dataset are attached to this email. Open the HTML file in any browser to review today's top candidates.
-          attachments: |
-            daily_report.html
-            .data/daily_dataset.json
-          
+
