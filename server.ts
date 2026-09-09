@@ -151,7 +151,7 @@ async function startServer() {
     console.log(`[PIPELINE] Saved Daily Dataset (${latestScanResults.length} candidates) for ${dailySnapshotDate}`);
   }
 // 1. Import the generator at the top of server.ts
-import { generateHtmlReport } from './src/utils/reportGenerator';
+// import { generateHtmlReport } from './src/utils/reportGenerator';
 
 // ... Inside your main execution or scheduled run function:
 async function executeDailyScreening() {
