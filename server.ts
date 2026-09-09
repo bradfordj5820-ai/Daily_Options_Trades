@@ -816,10 +816,11 @@ async function executeDailyScreening() {
     });
   });
 
-  // Prevent server from running indefinitely during CI/CD execution
+// Prevent server from running indefinitely during CI/CD execution
   if (process.env.CI === 'true') {
-    setTimeout(() => {
-      console.log('[SERVER] CI environment detected. Generating HTML report before shutdown...');
+    console.log('[SERVER] CI environment detected. Triggering immediate pipeline run for export...');
+    runDailyPipeline(true).then(() => {
+      console.log('[SERVER] Pipeline finished. Generating HTML report...');
       try {
         const jsonPath = path.join(DATA_DIR, 'daily_dataset.json');
         const htmlPath = path.join(process.cwd(), 'output', 'Daily_Options_Report.html');
@@ -834,7 +835,10 @@ async function executeDailyScreening() {
         console.log('[SERVER] Server closed');
         process.exit(0);
       });
-    }, 10000); // Trigger after 10 seconds to ensure pipeline data has finished populating
+    }).catch(err => {
+      console.error('[SERVER] Pipeline execution failed in CI:', err);
+      process.exit(1);
+    });
   }
 
 startServer().catch(err => {
