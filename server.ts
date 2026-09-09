@@ -149,7 +149,14 @@ async function startServer() {
 
     saveDailyDatasetToDisk();
     console.log(`[PIPELINE] Saved Daily Dataset (${latestScanResults.length} candidates) for ${dailySnapshotDate}`);
-  }
+ try {
+      const jsonPath = path.join(DATA_DIR, 'daily_dataset.json');
+      const htmlPath = path.join(process.cwd(), 'output', 'Daily_Options_Report.html');
+      generateHtmlReport(jsonPath, htmlPath);
+      console.log(`[PIPELINE] HTML report successfully generated at: ${htmlPath}`);
+    } catch (htmlErr) {
+      console.error('Failed to generate HTML report from pipeline:', htmlErr);
+    }
 // 1. Import the generator at the top of server.ts
 // import { generateHtmlReport } from './src/utils/reportGenerator';
 
