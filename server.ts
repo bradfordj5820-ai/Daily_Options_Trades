@@ -817,18 +817,25 @@ async function executeDailyScreening() {
   });
 
   // Prevent server from running indefinitely during CI/CD execution
-  // Exit after initialization is complete (useful for GitHub Actions workflows)
   if (process.env.CI === 'true') {
     setTimeout(() => {
-      console.log('[SERVER] CI environment detected. Initiating graceful shutdown...');
+      console.log('[SERVER] CI environment detected. Generating HTML report before shutdown...');
+      try {
+        const jsonPath = path.join(DATA_DIR, 'daily_dataset.json');
+        const htmlPath = path.join(process.cwd(), 'output', 'Daily_Options_Report.html');
+        generateHtmlReport(jsonPath, htmlPath);
+        console.log('[SERVER] HTML report generated successfully at:', htmlPath);
+      } catch (err) {
+        console.error('[SERVER] Failed to generate HTML report in CI block:', err);
+      }
+
       clearInterval(schedulerInterval);
       server.close(() => {
         console.log('[SERVER] Server closed');
         process.exit(0);
       });
-    }, 30000); // 30 second timeout for CI environments
+    }, 10000); // Trigger after 10 seconds to ensure pipeline data has finished populating
   }
-}
 
 startServer().catch(err => {
   console.error('Failed to start server:', err);
