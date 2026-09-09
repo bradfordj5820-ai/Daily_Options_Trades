@@ -6,6 +6,7 @@ import { createServer as createViteServer } from 'vite';
 import { CURATED_UNIVERSE, evaluateCandidate, generateRealisticCandidate } from './server/optionsEngine.js';
 import { generateExecutiveBriefing, generateStayExitRationale } from './server/geminiService.js';
 import { OptionCandidate, PlacedTrade, TradeEvaluation, DailyDatasetInfo } from './src/types.js';
+import { generateHtmlReport } from './src/utils/reportGenerator';
 
 async function startServer() {
   const app = express();
@@ -149,7 +150,24 @@ async function startServer() {
     saveDailyDatasetToDisk();
     console.log(`[PIPELINE] Saved Daily Dataset (${latestScanResults.length} candidates) for ${dailySnapshotDate}`);
   }
+// 1. Import the generator at the top of server.ts
+import { generateHtmlReport } from './src/utils/reportGenerator';
 
+// ... Inside your main execution or scheduled run function:
+async function executeDailyScreening() {
+    console.log("Running pre-market options screening...");
+    
+    // [Your existing logic that fetches data, calculates options plays, 
+    //  and saves the final JSON data to a file]
+    const jsonOutputPath = './placed_trades.json'; // or your target json path
+    
+    // 2. INSERT STEP 2 HERE: Immediately after the JSON file is saved
+    const htmlOutputPath = './output/Daily_Options_Report.html';
+    generateHtmlReport(jsonOutputPath, htmlOutputPath);
+    console.log("HTML report generated successfully, ready for email attachment.");
+
+    // [Your existing email dispatch step follows here...]
+}
   // Instant fallback dataset generator
   function generateInstantUniverseDataset(): OptionCandidate[] {
     const list: OptionCandidate[] = [];
