@@ -57,5 +57,3 @@ jobs:
           body: "Please find attached today's automated options screening report."
           # Point the attachment directly to your generated HTML file
           attachments: ./output/Daily_Options_Report.html
-            
-
