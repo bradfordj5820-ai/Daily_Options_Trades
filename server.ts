@@ -12,6 +12,7 @@ import { generateHtmlReport } from './src/utils/reportGenerator';
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const isCi = process.env.CI === 'true';
 
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
@@ -190,15 +191,17 @@ async function startServer() {
     saveDailyDatasetToDisk();
     console.log(`[PIPELINE] Initialized Instant Daily Dataset (${latestScanResults.length} candidates) for ${dailySnapshotDate}`);
     // Trigger live refresh in background without blocking server startup
-    setTimeout(() => {
-      runDailyPipeline(false).catch(e => console.error('Background pipeline error:', e));
-    }, 1000);
+    if (!isCi) {
+      setTimeout(() => {
+        runDailyPipeline(false).catch(e => console.error('Background pipeline error:', e));
+      }, 1000);
+    }
   }
 
   // ... (Other standard server code retained unmodified) ...
   
   // Prevent server from running indefinitely during CI/CD execution
-  if (process.env.CI === 'true') {
+  if (isCi) {
     console.log('[SERVER] CI environment detected. Triggering immediate pipeline run for export...');
     runDailyPipeline(true).then(() => {
       console.log('[SERVER] Pipeline finished. Generating HTML report...');
@@ -218,11 +221,7 @@ async function startServer() {
         console.error('[SERVER] Failed to generate HTML report in CI block:', err);
       }
 
-      clearInterval(schedulerInterval);
-      server.close(() => {
-        console.log('[SERVER] Server closed');
-        process.exit(0);
-      });
+      process.exit(0);
     }).catch(err => {
       console.error('[SERVER] Pipeline execution failed in CI:', err);
       process.exit(1);
