@@ -1,0 +1,83 @@
+name: Daily Options Trades Pipeline
+
+on:
+  schedule:
+    - cron: '30 13 * * 1-5' # Runs Monday to Friday pre-market
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Configure Google Cloud Credentials
+        env:
+          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -n "$GCP_SERVICE_ACCOUNT_KEY" ]; then
+            echo "$GCP_SERVICE_ACCOUNT_KEY" > gcp-key.json
+          fi
+
+      - name: Execute Quantitative Pipeline
+        env:
+          CI: "true"
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
+        run: |
+          # Executes your main server or report generation script using bun
+          bun run server.ts
+
+      - name: Verify Generated Report Exists
+        run: |
+          if [ ! -f "./output/Daily_Options_Report.html" ] && [ ! -f "pre_market_options_report.csv" ] && [ ! -f "output/pre_market_options_report.csv" ]; then
+            echo "Error: Report file was not generated!"
+            exit 1
+          fi
+
+      - name: Send Report via Email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '📊 Daily Options Pipeline Report'
+          to: ${{ secrets.RECIPIENT_EMAIL }}
+          from: ${{ secrets.SENDER_EMAIL }}
+          body: "Please find attached today's automated options screening report."
+          attachments: ./output/Daily_Options_Report.html
+
+      - name: Commit and Push Generated Report
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.csv reports/ output/ || true
+          git commit -m "chore: auto-generate daily options report [skip ci]" || echo "No changes to commit"
+          git push || true
